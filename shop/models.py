@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 
-
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
@@ -20,6 +19,7 @@ class Category(models.Model):
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    # Uploaded images will be placed in the 'brands/' folder in Cloudinary
     logo = models.ImageField(upload_to='brands/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -61,6 +61,7 @@ class BikeProduct(models.Model):
     color = models.CharField(max_length=50, blank=True)
     weight = models.CharField(max_length=50, blank=True)
     
+    # Uploaded images will be placed in the 'products/' folder in Cloudinary
     image = models.ImageField(upload_to='products/', blank=True, null=True)
     is_featured = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -163,10 +164,12 @@ class Sale(models.Model):
         self.final_amount = self.total_amount - self.discount
         
         # Update product stock if completed
-        is_new = self.pk is None
-        old_status = None if is_new else Sale.objects.get(pk=self.pk).status
+        if self.pk:
+            old_status = Sale.objects.get(pk=self.pk).status
+        else:
+            old_status = None
         
-        if self.status == 'completed' and (is_new or old_status != 'completed'):
+        if self.status == 'completed' and old_status != 'completed':
             # Deduct stock
             self.product.stock_quantity -= self.quantity
             self.product.save()
