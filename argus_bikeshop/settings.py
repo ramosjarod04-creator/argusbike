@@ -101,3 +101,9 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 # Do NOT set MEDIA_ROOT when using Cloudinary on Vercel
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'login'  # Or '/login/' depending on your urls.py name
+LOGIN_REDIRECT_URL = 'dashboard' # Where to go after logging in
+LOGOUT_REDIRECT_URL = 'login'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
