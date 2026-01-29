@@ -59,11 +59,9 @@ WSGI_APPLICATION = 'argus_bikeshop.wsgi.application'
 
 # Database
 # Note: SQLite will work on Vercel but will reset on every redeploy.
+import dj_database_url
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(default='sqlite:///db.sqlite3')
 }
 
 # Password validation
@@ -104,3 +102,6 @@ SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Store sessions in memory instead of the DB (Fixes the login crash on Vercel)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
