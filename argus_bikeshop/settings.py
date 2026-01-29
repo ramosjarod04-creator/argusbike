@@ -6,7 +6,7 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('!v#)7=ufso1^5kfjwd(+u8e-jo#62_83#$$zf7-zt^d6*(lx7s', 'django-insecure-change-this-in-production')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-!v#)7=ufso1^5kfjwd(+u8e-jo#62_83#$$zf7-zt^d6*(lx7s')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
@@ -20,10 +20,22 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',       # Added: Must be above staticfiles
     'django.contrib.staticfiles',
+    'cloudinary',               # Added: Cloudinary library
     'shop',
     'django.contrib.humanize',
 ]
+
+# --- CLOUDINARY STORAGE CONFIG ---
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
+# Tells Django to use Cloudinary for uploaded Media files
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,8 +70,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'argus_bikeshop.wsgi.application'
 
 # --- DATABASE CONFIGURATION ---
-# Use dj-database-url to pull from DATABASE_URL env var (Neon/Vercel)
-# Falls back to local SQLite if DATABASE_URL is not set.
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
