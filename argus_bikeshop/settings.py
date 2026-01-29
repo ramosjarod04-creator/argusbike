@@ -56,7 +56,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'argus_bikeshop.wsgi.application'
 
-# Database Configuration (Postgres for Vercel, SQLite for Local)
+# Database Configuration
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -67,29 +67,27 @@ DATABASES = {
 }
 
 # Cloudinary Configuration 
-# Note: Ensure these names match your Vercel Environment Variables
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-# Storage Configuration for Django 4.2+ / 5.x
+# Storage Configuration (Simplified for Vercel)
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        # Using StaticFilesStorage instead of Compressed to fix FileNotFoundError
         "BACKEND": "whitenoise.storage.StaticFilesStorage",
     },
 }
 
-# Legacy fix for Cloudinary Library & WhiteNoise compatibility
+# Compatibility strings
 STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-# WhiteNoise Optimization & Safety
+# WhiteNoise Safety
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_USE_FINDERS = True
 
@@ -108,14 +106,8 @@ USE_TZ = True
 # Static & Media Files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Automatically handle missing 'static' folder to prevent W004 warning
-if not os.path.exists(BASE_DIR / 'static'):
-    os.makedirs(BASE_DIR / 'static')
-
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Media is handled by Cloudinary
 MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
