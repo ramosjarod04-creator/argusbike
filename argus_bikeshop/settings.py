@@ -8,7 +8,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-!v#)7=ufso1^5kfjwd(+u
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['.vercel.app', 'now.sh', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['.vercel.app', 'now.sh', '127.0.0.1', 'localhost', 'argusbike.vercel.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -16,21 +16,21 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary_storage',
+    'cloudinary_storage',  # MUST stay above staticfiles
     'django.contrib.staticfiles',
     'cloudinary',
     'shop',
     'django.contrib.humanize',
 ]
 
-# Cloudinary Config
+# --- CLOUDINARY CONFIG ---
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-# Fixes the "Read-only file system" error
+# This forces images to Cloudinary, fixing the "Read-only file system" error
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MIDDLEWARE = [
@@ -65,7 +65,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'argus_bikeshop.wsgi.application'
 
-# Database - Uses Neon DATABASE_URL if available
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -93,10 +92,4 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
-LOGOUT_REDIRECT_URL = 'login'
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# No MEDIA_ROOT setting is strictly needed when using Cloudinary
