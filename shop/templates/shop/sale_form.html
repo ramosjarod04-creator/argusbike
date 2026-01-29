@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="row g-0">
+                    <div class="col-md-5 bg-dark text-white p-5">
+                        <h3 class="fw-bold mb-4">Order Summary</h3>
+                        <div class="mb-4">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" class="img-fluid rounded mb-3" style="max-height: 200px; width: 100%; object-fit: cover;">
+                            {% endif %}
+                            <h4 class="mb-1">{{ product.name }}</h4>
+                            <p class="text-info">{{ product.brand.name }}</p>
+                        </div>
+                        <hr class="border-secondary">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Price:</span>
+                            <span>₱{{ product.price }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7 p-5 bg-white">
+                        <h3 class="fw-bold mb-4">Your Details</h3>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-4 p-3 bg-light rounded border">
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Ordering as</small>
+                                <span class="h6 mb-0">{{ customer.first_name }} {{ customer.last_name }}</span>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Quantity</label>
+                                    {{ form.quantity }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Payment Method</label>
+                                    {{ form.payment_method }}
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Notes</label>
+                                    {{ form.notes }}
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mt-5 py-3 fw-bold shadow">
+                                Confirm Inquiry
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control, .form-select { border-radius: 10px; padding: 12px; border: 1px solid #ddd; }
+    body { background-color: #f1f5f9; }
+</style>
+{% endblock %}

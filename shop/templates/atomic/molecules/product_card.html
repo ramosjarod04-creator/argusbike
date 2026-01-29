@@ -1,0 +1,25 @@
+<div class="product-card">
+    <div class="product-image">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+        <div class="product-placeholder">🚴</div>
+        {% endif %}
+        <span class="badge badge-{{ product.status }}">{{ product.get_status_display }}</span>
+    </div>
+    <div class="product-details">
+        <h3>{{ product.name }}</h3>
+        <p class="product-brand">{{ product.brand.name }}</p>
+        <p class="product-sku">SKU: {{ product.sku }}</p>
+        <div class="product-specs">
+            {% if product.frame_size %}<span>📏 {{ product.frame_size }}</span>{% endif %}
+            {% if product.wheel_size %}<span>⚙️ {{ product.wheel_size }}</span>{% endif %}
+            {% if product.color %}<span>🎨 {{ product.color }}</span>{% endif %}
+        </div>
+        <p class="product-stock">Stock: {{ product.stock_quantity }}</p>
+        <div class="product-footer">
+            <p class="product-price">₱{{ product.price|floatformat:2 }}</p>
+            <a href="{% url 'product_detail' product.pk %}" class="btn btn-primary btn-sm">View Details</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,24 @@
+<nav class="navbar">
+    <div class="container">
+        <div class="nav-brand">
+            <h2>🚴 Argus Bike Shop</h2>
+            {% if user.is_staff %}
+            <span class="admin-badge">Staff</span>
+            {% endif %}
+        </div>
+        <ul class="nav-menu">
+            <li><a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a></li>
+            <li><a href="{% url 'product_list' %}" class="nav-link">Products</a></li>
+            <li><a href="{% url 'customer_list' %}" class="nav-link">Customers</a></li>
+            <li><a href="{% url 'sale_list' %}" class="nav-link">Sales</a></li>
+            
+            {% if user.is_staff %}
+            <li><a href="{% url 'product_create' %}" class="nav-link btn-secondary">+ Add Product</a></li>
+            <li><a href="{% url 'sale_create' %}" class="nav-link btn-primary">+ New Sale</a></li>
+            {% endif %}
+            
+            <li><span class="nav-user">👤 {{ user.username }}</span></li>
+            <li><a href="{% url 'logout' %}" class="nav-link">Logout</a></li>
+        </ul>
+    </div>
+</nav>

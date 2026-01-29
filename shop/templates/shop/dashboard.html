@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Welcome, {{ user.first_name|default:user.username|upper }}</h2>
+            <p class="text-muted small">
+                {% if is_admin %}
+                    <i class="fas fa-user-shield me-1 text-primary"></i> Managing Argus Bike Shop
+                {% else %}
+                    <i class="fas fa-bicycle me-1 text-primary"></i> Your Personal Bike Basket
+                {% endif %}
+            </p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-white text-dark border p-2 px-3 shadow-sm rounded-pill">
+                <i class="far fa-calendar-alt me-2 text-primary"></i>
+                {% now "F d, Y" %}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-5">
+        {% for item in shortcuts %}
+        <div class="col-md-3 col-6">
+            <a href="{% url item.url %}" class="card text-decoration-none p-4 h-100 text-center border-0 shadow-sm bg-white hover-up rounded-4">
+                <div class="mb-2">
+                    <div class="bg-primary bg-opacity-10 rounded-circle mx-auto d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="{{ item.icon }} fa-lg text-primary"></i>
+                    </div>
+                </div>
+                <span class="fw-bold text-dark small text-uppercase mt-2">{{ item.name }}</span>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_admin %}
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card p-4 border-0 shadow-sm text-white h-100 rounded-4" style="background: linear-gradient(45deg, #1e293b, #334155);">
+                    <small class="opacity-75 text-uppercase fw-bold">Total Revenue</small>
+                    <h1 class="fw-bold mb-0 mt-2">₱{{ total_revenue|floatformat:2 }}</h1>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 bg-white border-0 shadow-sm border-start border-warning border-5 h-100 rounded-4">
+                    <small class="text-muted text-uppercase fw-bold">Low Stock Alerts</small>
+                    <h1 class="fw-bold text-warning mb-0 mt-2">{{ low_stock_count }}</h1>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 bg-white border-0 shadow-sm border-start border-success border-5 h-100 rounded-4">
+                    <small class="text-muted text-uppercase fw-bold">Total Customers</small>
+                    <h1 class="fw-bold text-success mb-0 mt-2">{{ total_customers }}</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm overflow-hidden rounded-4">
+            <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">Recent Inquiries</h5>
+                <a href="{% url 'sale_list' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">View Full List</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="small text-uppercase text-muted">
+                            <th class="ps-4">ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in recent_sales %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-primary">#{{ sale.sale_id }}</td>
+                            <td>{{ sale.customer.name }}</td>
+                            <td>{{ sale.product.name }}</td>
+                            <td>
+                                {% if sale.status == 'completed' %}
+                                    <span class="badge rounded-pill bg-success-subtle text-success px-3">Approved</span>
+                                {% elif sale.status == 'pending' %}
+                                    <span class="badge rounded-pill bg-warning-subtle text-warning px-3">Pending</span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-danger-subtle text-danger px-3">Denied</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group shadow-sm">
+                                    <a href="{% url 'manage_sale_status' sale.pk 'approve' %}" class="btn btn-sm btn-success"><i class="fas fa-check"></i></a>
+                                    <a href="{% url 'manage_sale_status' sale.pk 'deny' %}" class="btn btn-sm btn-warning"><i class="fas fa-times"></i></a>
+                                    <a href="{% url 'manage_sale_status' sale.pk 'delete' %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete record?')"><i class="fas fa-trash-alt"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+            <h4 class="fw-bold mb-0">Featured Arrivals</h4>
+            <a href="{% url 'product_list' %}" class="btn btn-sm btn-link text-decoration-none fw-bold">View Catalog <i class="fas fa-chevron-right ms-1"></i></a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <a href="{% url 'product_list' %}" class="text-decoration-none">
+                    <div class="card h-100 border-2 border-dashed shadow-sm rounded-4 bg-white hover-up-blue" style="min-height: 310px; border-style: dashed !important;">
+                        <div class="card-body text-center d-flex flex-column align-items-center justify-content-center">
+                            <div class="bg-primary bg-opacity-10 rounded-circle mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                <i class="fas fa-bicycle fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark">Browse Our Latest Bikes</h5>
+                            <p class="text-muted small px-3">Discover your next ride. Click here to see all bikes!</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            {% for product in featured_products %}
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="card h-100 border-0 shadow-sm product-hover rounded-4 overflow-hidden">
+                    <div class="position-relative">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-bicycle fa-3x text-muted opacity-25"></i>
+                            </div>
+                        {% endif %}
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <span class="badge bg-dark rounded-pill shadow-sm">₱{{ product.price }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-3">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">{{ product.brand.name }}</small>
+                        <h6 class="fw-bold mb-3 text-truncate">{{ product.name }}</h6>
+                        <a href="{% url 'product_detail' product.pk %}" class="btn btn-primary btn-sm w-100 rounded-pill">Inquire Now</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    body { background-color: #f8fafc; }
+    .rounded-4 { border-radius: 1rem !important; }
+    .hover-up { transition: all 0.3s ease; }
+    .hover-up:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
+    
+    /* Browse Card Specific Hover */
+    .hover-up-blue:hover {
+        transform: translateY(-5px);
+        background-color: #f0f7ff !important;
+        border-color: #3b82f6 !important;
+        transition: all 0.3s ease;
+    }
+
+    .product-hover:hover { 
+        transform: scale(1.02); 
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; 
+        transition: all 0.3s ease;
+    }
+    
+    .bg-success-subtle { background-color: #dcfce7; color: #166534; }
+    .bg-warning-subtle { background-color: #fef9c3; color: #854d0e; }
+    .bg-danger-subtle { background-color: #fee2e2; color: #991b1b; }
+    
+    .text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .border-dashed { border: 2px dashed #cbd5e1 !important; }
+</style>
+{% endblock %}

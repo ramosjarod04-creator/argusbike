@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Products - Argus Bike Shop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+        <div>
+            <h1 class="fw-bold text-dark mb-1">Store Inventory</h1>
+            <p class="text-muted mb-0">Browse and manage your bike collection</p>
+        </div>
+        {% if user.is_staff %}
+        <a href="{% url 'product_create' %}" class="btn btn-dark btn-lg shadow-sm px-4" style="border-radius: 12px;">
+            <i class="fas fa-plus me-2"></i> Add New Bike
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card border-0 shadow-sm p-3 mb-5" style="border-radius: 15px; background-color: #fff;">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <div class="input-group bg-light rounded-3">
+                    <span class="input-group-text border-0 bg-transparent text-muted"><i class="fas fa-search"></i></span>
+                    <input type="text" name="search" placeholder="Search bikes..." class="form-control border-0 bg-transparent py-2" value="{{ search }}">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select name="category" class="form-select border-0 bg-light py-2 rounded-3">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select border-0 bg-light py-2 rounded-3">
+                    <option value="">Availability</option>
+                    <option value="in_stock">In Stock</option>
+                    <option value="low_stock">Low Stock</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button type="submit" class="btn btn-primary fw-bold py-2 rounded-3">Filter</button>
+            </div>
+            <div class="col-md-1 d-grid">
+                <a href="{% url 'product_list' %}" class="btn btn-outline-light text-muted py-2">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-sm-6 col-lg-4 col-xl-3">
+            <div class="card h-100 border-0 shadow-sm product-card">
+                <div class="position-relative">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-bicycle fa-3x text-muted opacity-25"></i>
+                        </div>
+                    {% endif %}
+                    <span class="position-absolute top-0 end-0 m-3 badge {% if product.stock_quantity > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ product.get_status_display }}
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <small class="text-primary fw-bold text-uppercase" style="font-size: 0.7rem;">{{ product.brand.name }}</small>
+                    <h5 class="fw-bold text-dark mt-1">{{ product.name }}</h5>
+                    <p class="text-muted small mb-3">{{ product.description|truncatechars:60 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="h5 fw-bold text-dark mb-0">₱{{ product.price }}</span>
+                        <a href="{% url 'product_detail' product.pk %}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="bg-white rounded-4 p-5 shadow-sm">
+                <i class="fas fa-search fa-4x text-muted opacity-25 mb-4"></i>
+                <h3 class="fw-bold">No bikes found</h3>
+                <p class="text-muted">Try a different search term or category</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    }
+</style>
+{% endblock %}

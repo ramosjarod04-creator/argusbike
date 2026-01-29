@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'product_list' %}" class="text-decoration-none">Shop</a></li>
+                <li class="breadcrumb-item active">{{ product.name }}</li>
+            </ol>
+        </nav>
+        
+        {% if user.is_staff %}
+        <div class="d-flex gap-2">
+            <a href="{% url 'product_update' product.pk %}" class="btn btn-outline-dark btn-sm px-3">
+                <i class="fas fa-edit me-1"></i> Edit Details
+            </a>
+            <button class="btn btn-outline-danger btn-sm px-3" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-1"></i> Deactivate
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm overflow-hidden">
+                {% if product.image %}
+                <div class="bg-light text-center border-bottom">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 400px; width: auto;">
+                </div>
+                {% endif %}
+
+                <div class="card-body p-4">
+                    <div class="row align-items-start">
+                        <div class="col-md-8">
+                            <h6 class="text-primary text-uppercase fw-bold mb-1 letter-spacing-1">{{ product.brand.name }}</h6>
+                            <h2 class="fw-bold mb-3 text-dark">{{ product.name }}</h2>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <h2 class="fw-bold text-dark mb-1">₱{{ product.price }}</h2>
+                            <span class="badge {% if product.stock_quantity > 0 %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} border px-3 py-2 rounded-pill">
+                                ● {{ product.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-muted opacity-25">
+
+                    <h5 class="fw-bold mb-3 d-flex align-items-center">
+                        <i class="fas fa-info-circle me-2 text-primary"></i> Specifications
+                    </h5>
+                    <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
+                        <div class="col text-center">
+                            <div class="p-3 border-0 rounded bg-light h-100">
+                                <small class="text-muted d-block text-uppercase mb-1" style="font-size: 0.7rem;">SKU</small>
+                                <span class="fw-bold text-dark">{{ product.sku|default:"N/A" }}</span>
+                            </div>
+                        </div>
+                        <div class="col text-center">
+                            <div class="p-3 border-0 rounded bg-light h-100">
+                                <small class="text-muted d-block text-uppercase mb-1" style="font-size: 0.7rem;">Frame</small>
+                                <span class="fw-bold text-dark">{{ product.frame_size }}</span>
+                            </div>
+                        </div>
+                        <div class="col text-center">
+                            <div class="p-3 border-0 rounded bg-light h-100">
+                                <small class="text-muted d-block text-uppercase mb-1" style="font-size: 0.7rem;">Wheels</small>
+                                <span class="fw-bold text-dark">{{ product.wheel_size }}</span>
+                            </div>
+                        </div>
+                        <div class="col text-center">
+                            <div class="p-3 border-0 rounded bg-light h-100">
+                                <small class="text-muted d-block text-uppercase mb-1" style="font-size: 0.7rem;">Condition</small>
+                                <span class="fw-bold text-dark text-capitalize">{{ product.get_condition_display }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <h5 class="fw-bold mb-2">Description</h5>
+                        <p class="text-muted lead fs-6 lh-base">{{ product.description }}</p>
+                    </div>
+
+                    {% if not user.is_staff %}
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="{% url 'sale_create' %}?product={{ product.id }}" class="btn btn-primary btn-lg w-100 py-3 shadow-sm">
+                            <i class="fas fa-cart-plus me-2"></i> Add to Inquiry / Cart
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);">
+                <div class="card-body p-4 text-center text-white">
+                    <h6 class="text-uppercase small opacity-75 fw-bold letter-spacing-1">Current Stock</h6>
+                    <h1 class="display-3 fw-bold my-2">{{ product.stock_quantity }}</h1>
+                    <p class="mb-0 small opacity-75">Units currently in the showroom</p>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold d-flex align-items-center">
+                        <i class="fas fa-history me-2 text-primary"></i> Recent Activity
+                    </h6>
+                </div>
+                <div class="list-group list-group-flush" style="max-height: 400px; overflow-y: auto;">
+                    {% for log in stock_history %}
+                    <div class="list-group-item py-3 bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted d-block">{{ log.created_at|date:"M d, Y" }}</small>
+                                <span class="fw-bold text-dark" style="font-size: 0.9rem;">{{ log.get_action_display }}</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="{% if log.action == 'add' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                                    {% if log.action == 'add' %}+{% else %}-{% endif %}{{ log.quantity_change }}
+                                </span>
+                                <small class="d-block text-muted" style="font-size: 0.75rem;">Bal: {{ log.new_quantity }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="fas fa-box-open d-block mb-2 fa-2x opacity-25"></i>
+                        No activity logged yet.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_staff %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Confirm Deactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to deactivate <strong>{{ product.name }}</strong>? It will no longer be visible to customers.
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'product_delete' product.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirm Deactivation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    body { background-color: #f1f5f9; }
+    .card { border-radius: 16px; }
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .bg-success-subtle { background-color: #dcfce7; color: #166534; }
+    .bg-danger-subtle { background-color: #fee2e2; color: #991b1b; }
+    .breadcrumb-item + .breadcrumb-item::before { content: "›"; color: #94a3b8; }
+    .list-group-item { border-left: none; border-right: none; transition: background 0.2s; }
+    .list-group-item:hover { background-color: #f8fafc; }
+</style>
+{% endblock %}
