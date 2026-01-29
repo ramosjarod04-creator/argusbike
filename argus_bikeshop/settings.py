@@ -4,14 +4,15 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Security
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['.vercel.app', 'now.sh', '127.0.0.1', 'localhost', 'argusbike.vercel.app']
 
-# CRITICAL: cloudinary_storage must be ABOVE django.contrib.staticfiles
+# Application definition
 INSTALLED_APPS = [
-    'cloudinary_storage',
+    'cloudinary_storage', # Must be above staticfiles
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -25,7 +26,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Essential for Vercel
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -55,7 +56,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'argus_bikeshop.wsgi.application'
 
-# Database Configuration
+# Database Configuration (Postgres for Vercel, SQLite for Local)
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
@@ -65,22 +66,32 @@ DATABASES = {
     )
 }
 
-# Cloudinary Configuration
+# Cloudinary Configuration 
+# Note: Ensure these names match your Vercel Environment Variables
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('dffp0qybt'),
-    'API_KEY': os.environ.get('969847296223693'),
-    'API_SECRET': os.environ.get('VaHWauzWAdy6-TnzfwEcxILP2Ew'),
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-# New Django 4.2+ Storage Configuration
+# Storage Configuration for Django 4.2+ / 5.x
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Using StaticFilesStorage instead of Compressed to fix FileNotFoundError
+        "BACKEND": "whitenoise.storage.StaticFilesStorage",
     },
 }
+
+# Legacy fix for Cloudinary Library & WhiteNoise compatibility
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# WhiteNoise Optimization & Safety
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_USE_FINDERS = True
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -94,16 +105,25 @@ TIME_ZONE = 'Asia/Manila'
 USE_I18N = True
 USE_TZ = True
 
+# Static & Media Files
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Automatically handle missing 'static' folder to prevent W004 warning
+if not os.path.exists(BASE_DIR / 'static'):
+    os.makedirs(BASE_DIR / 'static')
+
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Media is handled by Cloudinary
 MEDIA_URL = '/media/'
-# Do NOT set MEDIA_ROOT when using Cloudinary on Vercel
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = 'login'  # Or '/login/' depending on your urls.py name
-LOGIN_REDIRECT_URL = 'dashboard' # Where to go after logging in
+# Auth Settings
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
+# Session Configuration
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
