@@ -2,15 +2,15 @@
 WSGI config for argus_bikeshop project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 """
 
 import os
-
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'argus_bikeshop.settings')
 
+# This is the standard Django application
 application = get_wsgi_application()
+
+# This is the entry point Vercel needs to find the app
+app = application
