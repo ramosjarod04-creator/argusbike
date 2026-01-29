@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-import dj_database_url  # Important: Ensure this is in requirements.txt
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -9,10 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('!v#)7=ufso1^5kfjwd(+u8e-jo#62_83#$$zf7-zt^d6*(lx7s', 'django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Set to False in Vercel environment variables for better security
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# Updated to allow Vercel domains
 ALLOWED_HOSTS = ['.vercel.app', 'now.sh', '127.0.0.1', 'localhost']
 
 # Application definition
@@ -29,7 +27,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # For static files
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,13 +58,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'argus_bikeshop.wsgi.application'
 
 # --- DATABASE CONFIGURATION ---
-# This looks for 'DATABASE_URL' in Vercel/Neon. 
-# If not found (like on your PC), it uses the local SQLite file.
+# Use dj-database-url to pull from DATABASE_URL env var (Neon/Vercel)
+# Falls back to local SQLite if DATABASE_URL is not set.
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
         conn_health_checks=True,
+        ssl_require=True if os.environ.get('DATABASE_URL') else False
     )
 }
 
@@ -99,15 +98,4 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
-# Security Headers
-SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
-SECURE_BROWSER_XSS_FILTER = True
-X_FRAME_OPTIONS = 'DENY'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Session Storage
-# If using Postgres, you can remove the line below to store sessions in the DB again.
-# We will leave it as 'cache' for now to ensure your site doesn't crash during the transition.
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
