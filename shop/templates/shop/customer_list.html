@@ -1,128 +1,176 @@
 {% extends 'base.html' %}
 
-{% block title %}Customer Directory | Argus Bike Shop{% endblock %}
+{% block title %}{{ action }} Customer | Argus Bike Shop{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Customer Directory</h2>
-            <p class="text-muted small mb-0">Manage and view all registered shop customers</p>
-        </div>
-        <a href="{% url 'customer_create' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
-            <i class="fas fa-plus-circle me-2"></i>Add New Customer
-        </a>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-3 rounded-4 bg-white">
-                <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Total Customers</small>
-                <h4 class="fw-bold mb-0 text-primary">{{ customers|length }}</h4>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <a href="{% url 'customer_list' %}" class="text-decoration-none text-muted small">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Customer Directory
+                </a>
             </div>
-        </div>
-    </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table align-middle mb-0 table-hover">
-                <thead class="bg-light">
-                    <tr class="text-uppercase text-muted small">
-                        <th class="ps-4 py-3">ID</th>
-                        <th class="py-3">Customer Info</th>
-                        <th class="py-3">Contact Details</th>
-                        <th class="py-3">Address</th>
-                        <th class="text-end pe-4 py-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for customer in customers %}
-                    <tr>
-                        <td class="ps-4">
-                            <span class="badge bg-light text-dark border">#{{ customer.id }}</span>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                    <span class="fw-bold text-primary">{{ customer.name|first|upper }}</span>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white py-4 px-4 border-0">
+                    <h4 class="mb-0 fw-bold">
+                        <i class="fas fa-user-plus me-2"></i>{{ action }} Customer
+                    </h4>
+                    <p class="mb-0 small opacity-75 mt-1">Fill in the customer information below</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger rounded-3 mb-4">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-4">
+                            <!-- Customer Name -->
+                            <div class="col-md-6">
+                                <label for="{{ form.name.id_for_label }}" class="form-label fw-bold text-dark">
+                                    Customer Name <span class="text-danger">*</span>
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors.0 }}
                                 </div>
-                                <div>
-                                    <div class="fw-bold text-dark">{{ customer.name }}</div>
-                                    <small class="text-muted">Joined: {{ customer.created_at|date:"M Y"|default:"N/A" }}</small>
+                                {% endif %}
+                                <small class="text-muted">Full name of the customer</small>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6">
+                                <label for="{{ form.email.id_for_label }}" class="form-label fw-bold text-dark">
+                                    Email Address <span class="text-danger">*</span>
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors.0 }}
                                 </div>
+                                {% endif %}
+                                <small class="text-muted">Primary contact email</small>
                             </div>
-                        </td>
-                        <td>
-                            <div class="mb-1">
-                                <i class="far fa-envelope me-2 text-muted small"></i>{{ customer.email }}
+
+                            <!-- Phone -->
+                            <div class="col-md-6">
+                                <label for="{{ form.phone.id_for_label }}" class="form-label fw-bold text-dark">
+                                    Phone Number
+                                </label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.phone.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="text-muted">Contact phone number</small>
                             </div>
-                            <div>
-                                <i class="fas fa-phone-alt me-2 text-muted small"></i>{{ customer.phone|default:"No phone" }}
+
+                            <!-- Address -->
+                            <div class="col-12">
+                                <label for="{{ form.address.id_for_label }}" class="form-label fw-bold text-dark">
+                                    Address
+                                </label>
+                                {{ form.address }}
+                                {% if form.address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.address.errors.0 }}
+                                </div>
+                                {% endif %}
+                                <small class="text-muted">Customer's full address</small>
                             </div>
-                        </td>
-                        <td>
-                            <div class="text-truncate small" style="max-width: 200px;" title="{{ customer.address }}">
-                                <i class="fas fa-map-marker-alt me-2 text-muted"></i>{{ customer.address|default:"Not provided" }}
-                            </div>
-                        </td>
-                        <td class="text-end pe-4">
-                            <div class="dropdown">
-                                <button class="btn btn-light btn-sm rounded-pill px-3 shadow-sm border" type="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-3">
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2 text-muted"></i> Edit Profile</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fas fa-history me-2 text-muted"></i> Order History</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash-alt me-2"></i> Remove</a></li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center py-5">
-                            <div class="text-muted">
-                                <i class="fas fa-users fa-3x mb-3 opacity-25"></i>
-                                <p class="mb-0">No customers found in the database.</p>
-                                <a href="{% url 'customer_create' %}" class="small text-decoration-none">Add your first customer</a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex gap-3 justify-content-end">
+                            <a href="{% url 'customer_list' %}" class="btn btn-light rounded-pill px-4 border">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                <i class="fas fa-save me-2"></i>{{ action }} Customer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Professional Overrides */
+    /* Professional Form Styling */
     body { background-color: #f8fafc; }
     .rounded-4 { border-radius: 1rem !important; }
     
-    .table thead th {
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        border-bottom: none;
-    }
-    
-    .table tbody tr {
-        transition: background-color 0.2s ease;
-    }
-    
-    .table tbody tr:hover {
-        background-color: #f1f5f9;
+    .form-control, .form-select {
+        border: 1.5px solid #e2e8f0;
+        border-radius: 0.5rem;
+        padding: 0.65rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
     }
 
-    .dropdown-item {
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-label small {
+        font-weight: 400;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .btn {
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    }
+
+    .btn-light:hover {
+        background-color: #e9ecef;
+    }
+
+    .invalid-feedback {
         font-size: 0.85rem;
-        padding: 0.6rem 1.2rem;
-    }
-
-    .dropdown-item:hover {
-        background-color: #f8fafc;
-        color: #0d6efd;
+        margin-top: 0.25rem;
     }
 </style>
+
+<script>
+    // Bootstrap form validation
+    (function() {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
 {% endblock %}
