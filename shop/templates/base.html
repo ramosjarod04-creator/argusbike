@@ -35,6 +35,7 @@
             transition: all 0.3s;
             min-height: 100vh;
             position: fixed;
+            z-index: 1000;
         }
 
         #content {
@@ -108,9 +109,28 @@
 
         /* Mobile Adjustments */
         @media (max-width: 768px) {
-            #sidebar { margin-left: -260px; }
-            #sidebar.active { margin-left: 0; }
-            #content { padding-left: 0; }
+            #sidebar { 
+                margin-left: -260px;
+            }
+            #sidebar.active { 
+                margin-left: 0;
+            }
+            #content { 
+                padding-left: 0;
+                width: 100%;
+            }
+            
+            /* Overlay when sidebar is open on mobile */
+            #sidebar.active ~ #content::before {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
         }
     </style>
 </head>
@@ -172,10 +192,12 @@
         </nav>
 
         <div id="content">
-            <nav class="navbar navbar-expand-lg navbar-light bg-transparent py-3 px-4 d-md-none">
+            <!-- Mobile menu button - FIXED POSITIONING -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3 px-4 d-md-none" style="position: sticky; top: 0; z-index: 998;">
                 <button type="button" id="sidebarCollapse" class="btn btn-primary">
-                    <i class="fas fa-align-left"></i>
+                    <i class="fas fa-bars"></i>
                 </button>
+                <span class="ms-3 fw-bold">Argus BikeShop</span>
             </nav>
 
             <div class="container-fluid pt-3">
@@ -199,9 +221,18 @@
         document.addEventListener("DOMContentLoaded", function() {
             const btn = document.getElementById('sidebarCollapse');
             const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            
             if(btn) {
                 btn.addEventListener('click', () => {
                     sidebar.classList.toggle('active');
+                });
+                
+                // Close sidebar when clicking outside on mobile
+                content.addEventListener('click', (e) => {
+                    if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && !btn.contains(e.target)) {
+                        sidebar.classList.remove('active');
+                    }
                 });
             }
         });
