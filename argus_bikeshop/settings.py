@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import dj_database_url
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security
@@ -26,7 +27,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', # Essential for Vercel
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Keep this here!
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -73,21 +74,17 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
 
-# Storage Configuration (Simplified for Vercel)
+# Modern Storage Configuration (Django 4.2+)
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
-# Compatibility strings
-STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-# WhiteNoise Safety
+# WhiteNoise Settings
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_USE_FINDERS = True
 
@@ -106,7 +103,15 @@ USE_TZ = True
 # Static & Media Files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Only include STATICFILES_DIRS if the folder actually exists to avoid build errors
+STATIC_PATH = BASE_DIR / 'static'
+if STATIC_PATH.exists():
+    STATICFILES_DIRS = [STATIC_PATH]
+
+# Create STATIC_ROOT if it doesn't exist to silence the UserWarning
+if not STATIC_ROOT.exists():
+    os.makedirs(STATIC_ROOT, exist_ok=True)
 
 MEDIA_URL = '/media/'
 
